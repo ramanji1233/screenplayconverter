@@ -1,0 +1,874 @@
+            <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Screenplay Converter | AI-Powered Storyboarding (Updated)</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://js.puter.com/v2/"></script>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --accent: #f72585;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --success: #4cc9f0;
+            --warning: #f8961e;
+            --danger: #e63946;
+            --gray: #adb5bd;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        * { box-sizing: border-box; }
+        body{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin:0; padding-bottom:2rem; background:linear-gradient(135deg,#f5f7fa 0%,#c3cfe2 100%); color:var(--dark);} 
+        .container{ max-width:1200px; margin:0 auto; padding:0 1rem; }
+        header{ background:var(--primary); color:#fff; padding:1rem 0; position:sticky; top:0; z-index:100; box-shadow:var(--shadow); }
+        .header-content{ display:flex; align-items:center; justify-content:space-between; gap:1rem; }
+        .logo{ display:flex; gap:.75rem; align-items:center; font-weight:700; font-size:1.15rem; }
+        nav ul{ display:flex; gap:1rem; list-style:none; }
+        nav a{ color:#fff; text-decoration:none; display:flex; gap:.5rem; align-items:center }
+        .user-actions{ display:flex; gap:.5rem; }
+        .btn{ padding:.6rem 1rem; border-radius:999px; border:none; cursor:pointer; font-weight:600; display:inline-flex; gap:.5rem; align-items:center }
+        .btn-primary{ background:var(--accent); color:#fff }
+        .btn-outline{ background:transparent; color:#fff; border:2px solid rgba(255,255,255,0.2) }
+
+        .hero{ text-align:center; padding:2rem 0; color:#fff; background:linear-gradient(rgba(67,97,238,.95),rgba(63,55,201,.95)); border-radius:0 0 14px 14px; margin-bottom:1.5rem }
+        .hero h1{ font-size:1.6rem; margin-bottom:.5rem }
+        .app-container{ display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+        .panel{ background:#fff; border-radius:12px; padding:1rem; box-shadow:var(--shadow); }
+        textarea{ width:100%; min-height:280px; padding:1rem; border-radius:8px; border:1px solid var(--gray); font-family:'Courier New', monospace; font-size:14px; resize:vertical }
+        .editor-actions{ display:flex; gap:.5rem; flex-wrap:wrap }
+        .storyboard-container{ display:grid; grid-template-columns:1fr; gap:1rem; min-height:200px }
+        .scene-card{ background:var(--light); border-radius:8px; overflow:hidden; box-shadow:0 2px 6px rgba(0,0,0,.05); }
+        .scene-image{ height:180px; background:linear-gradient(45deg,#ddd,#eee); display:flex; align-items:center; justify-content:center; color:#777; position:relative; cursor:pointer }
+        .scene-image img{ width:100%; height:100%; object-fit:cover; }
+        .scene-content{ padding:1rem }
+        .scene-heading{ display:flex; justify-content:space-between; align-items:center; margin-bottom:.5rem }
+        .scene-number{ background:var(--primary); color:#fff; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center }
+        .scene-actions{ margin-top:.5rem; display:flex; gap:.5rem }
+        .projects-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1rem }
+        .project-card{ background:#fff; border-radius:10px; padding:1rem; box-shadow:var(--shadow); }
+        .chatbot-container{ margin-top:1rem; border-radius:12px; overflow:hidden }
+        .chatbot-header{ background:var(--primary); color:#fff; padding:1rem; display:flex; align-items:center; gap:.5rem }
+        .chatbot-messages{ height:220px; overflow:auto; padding:1rem; display:flex; flex-direction:column; gap:.5rem; background:#fff }
+        .message{ padding:.6rem .9rem; border-radius:14px; max-width:85% }
+        .user-message{ margin-left:auto; background:var(--primary); color:#fff }
+        .bot-message{ background:var(--light); color:var(--dark) }
+
+        .modal{ display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); align-items:center; justify-content:center; z-index:1200 }
+        .modal-content{ background:#fff; padding:1rem; border-radius:10px; width:90%; max-width:720px }
+        .tabs{ display:flex; gap:.5rem; border-bottom:1px solid var(--gray); margin-bottom:1rem }
+        .tab{ padding:.5rem 1rem; cursor:pointer }
+        .tab.active{ border-bottom:3px solid var(--primary); color:var(--primary); font-weight:700 }
+
+        .placeholder-text{ padding:1.5rem; text-align:center; color:var(--gray); font-style:italic }
+
+        footer{ text-align:center; margin-top:2rem; color:var(--gray) }
+
+        @media (max-width:900px){ .app-container{ grid-template-columns:1fr } }
+    </style>
+</head>
+<body>
+<header>
+    <div class="container">
+        <div class="header-content">
+            <div class="logo"><i class="fas fa-film"></i> <span>Screenplay Converter</span></div>
+            <nav>
+                <ul>
+                    <li><a href="#"><i class="fas fa-home"></i> Home</a></li>
+                    <li><a href="#"><i class="fas fa-magic"></i> Converter</a></li>
+                    <li><a href="#projects"><i class="fas fa-project-diagram"></i> Projects</a></li>
+                    <li><a href="#help"><i class="fas fa-question-circle"></i> Help</a></li>
+                </ul>
+            </nav>
+            <div class="user-actions">
+                <button class="btn btn-outline" id="login-btn"><i class="fas fa-sign-in-alt"></i> Log In</button>
+                <button class="btn btn-primary" id="signup-btn"><i class="fas fa-user-plus"></i> Sign Up</button>
+            </div>
+        </div>
+    </div>
+</header>
+
+<section class="hero">
+    <div class="container">
+        <h1>Transform Screenplays into Visual Storyboards</h1>
+        <p>AI-assisted storyboard generation. Save projects locally, import/export JSON, download images, and iterate fast.</p>
+        <button class="btn btn-primary" id="try-now-btn"><i class="fas fa-play"></i> Try It Now</button>
+    </div>
+</section>
+
+<div class="container">
+    <div class="app-container">
+        <div class="panel">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem">
+                <h3 style="color:var(--primary);display:flex;gap:.5rem;align-items:center"><i class="fas fa-edit"></i> Screenplay Editor</h3>
+                <div class="editor-actions">
+                    <button class="btn btn-primary" id="convert-btn"><i class="fas fa-sync-alt"></i> Convert</button>
+                    <button class="btn btn-outline" id="save-btn"><i class="fas fa-save"></i> Save</button>
+                </div>
+            </div>
+
+            <textarea id="screenplay-input" placeholder="Enter your screenplay here...">INT. COFFEE SHOP - DAY
+
+A bustling coffee shop filled with people working on laptops and chatting. SARAH (30s, creative type) sips her latte while staring at her laptop screen.
+
+SARAH
+(frustrated)
+I can't believe I'm stuck on this scene again.
+
+She closes her laptop and looks out the window, deep in thought.
+
+EXT. PARK - DAY
+
+Sarah walks through a beautiful park, the autumn leaves crunching beneath her feet. She stops to watch children playing.
+
+SARAH
+(voiceover)
+Sometimes the best ideas come when you're not trying so hard.
+
+She smiles, pulls out a small notebook, and starts writing.
+
+INT. SARAH'S APARTMENT - NIGHT
+
+Sarah sits at her desk, typing furiously on her laptop. The screen illuminates her determined face.
+
+SARAH
+(to herself)
+Yes! This is it. This is the breakthrough I needed.</textarea>
+
+            <div class="editor-actions" style="margin-top:.75rem">
+                <button class="btn btn-outline" id="import-btn"><i class="fas fa-upload"></i> Import</button>
+                <button class="btn btn-outline" id="export-btn"><i class="fas fa-download"></i> Export</button>
+                <button class="btn btn-outline" id="clear-btn"><i class="fas fa-trash"></i> Clear</button>
+                <button class="btn btn-outline" id="export-json-btn" title="Export project as JSON">Export JSON</button>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem">
+                <h3 style="color:var(--primary);display:flex;gap:.5rem;align-items:center"><i class="fas fa-images"></i> Storyboard Preview</h3>
+                <div style="display:flex;gap:.5rem">
+                    <button class="btn btn-primary" id="generate-all-btn"><i class="fas fa-bolt"></i> Generate All Images</button>
+                    <select id="scene-select" style="padding:.5rem;border-radius:8px;border:1px solid var(--gray);min-width:160px">
+                        <option value="">Select a scene...</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="storyboard-container" id="storyboard-container">
+                <div class="placeholder-text">Your storyboard will appear here after converting your screenplay</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel ai-generation" style="margin-top:1rem">
+        <h3 style="color:var(--primary);display:flex;gap:.5rem;align-items:center"><i class="fas fa-robot"></i> AI Image Generation (Freepik)</h3>
+        <p>Generate dynamic images based on screenplay text using Freepik API. AI-powered image generation from text descriptions.</p>
+        <div style="display:flex;gap:.5rem;align-items:center;margin-top:.5rem;flex-wrap:wrap;margin-bottom:.5rem">
+            <select id="aspect-ratio-select" style="flex:1;padding:.6rem;border:1px solid var(--gray);border-radius:8px;min-width:200px" title="Select aspect ratio for generated images">
+                <option value="widescreen_16_9">Widescreen 16:9</option>
+                <option value="square_1_1">Square 1:1</option>
+                <option value="portrait_9_16">Portrait 9:16</option>
+                <option value="landscape_4_3">Landscape 4:3</option>
+            </select>
+            <button class="btn btn-outline" id="test-api-btn"><i class="fas fa-flask"></i> Test API</button>
+            <button class="btn btn-outline" id="style-options-btn"><i class="fas fa-palette"></i> Settings</button>
+        </div>
+        <div style="display:flex;gap:.5rem;align-items:center;margin-top:.5rem;flex-wrap:wrap">
+            <input id="ai-prompt-input" class="ai-prompt-input" style="flex:1;padding:.6rem;border:1px solid var(--gray);border-radius:8px;min-width:160px" placeholder="Enter a custom prompt...">
+            <button class="btn btn-primary" id="generate-single-btn"><i class="fas fa-magic"></i> Generate Image</button>
+        </div>
+    </div>
+
+    <div id="projects" class="panel" style="margin-top:1rem">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">
+            <h3 style="color:var(--primary);display:flex;align-items:center;gap:.5rem"><i class="fas fa-project-diagram"></i> Your Projects</h3>
+            <div style="display:flex;gap:.5rem">
+                <button class="btn btn-primary" id="new-project-btn"><i class="fas fa-plus"></i> New Project</button>
+                <button class="btn btn-outline" id="import-json-btn" title="Import project JSON">Import JSON</button>
+            </div>
+        </div>
+
+        <div class="projects-grid" id="projects-grid">
+            <!-- projects will be injected here -->
+        </div>
+    </div>
+
+    <!-- Chatbot -->
+    <div class="chatbot-container panel" style="margin-top:1rem">
+        <div class="chatbot-header"><i class="fas fa-robot"></i><strong> AI Screenplay Assistant</strong></div>
+        <div class="chatbot-messages" id="chatbot-messages">
+            <div class="message bot-message">Hello! I'm your AI assistant for formatting, structure and story ideas. Try asking about formatting or characters.</div>
+        </div>
+        <div style="display:flex;gap:.5rem;padding:1rem;background:#fff;border-top:1px solid var(--gray)">
+            <input id="chatbot-input" placeholder="Ask me anything about screenwriting..." style="flex:1;padding:.6rem;border-radius:999px;border:1px solid var(--gray)">
+            <button id="send-message-btn" class="btn btn-primary"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+</div>
+
+<!-- Fullscreen image modal -->
+<div class="modal" id="image-modal">
+    <div class="modal-content" style="position:relative;">
+        <button id="close-image-modal" style="position:absolute;right:10px;top:10px;border:none;background:transparent;font-size:20px;cursor:pointer">&times;</button>
+        <img id="modal-image" src="" alt="" style="width:100%;height:auto;border-radius:8px;max-height:80vh;object-fit:contain">
+        <div style="margin-top:.5rem;display:flex;gap:.5rem;justify-content:flex-end">
+            <button id="download-current-image" class="btn btn-primary"><i class="fas fa-download"></i> Download</button>
+        </div>
+    </div>
+</div>
+
+<!-- Simple auth modal (keeps previous behavior) -->
+<div class="modal" id="auth-modal">
+    <div class="modal-content">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">
+            <h3 id="modal-title">Log In to Your Account</h3>
+            <button id="close-auth" style="border:none;background:transparent;font-size:20px;cursor:pointer">&times;</button>
+        </div>
+        <div class="tabs">
+            <div class="tab active" data-tab="login">Log In</div>
+            <div class="tab" data-tab="signup">Sign Up</div>
+        </div>
+        <div id="login-tab" class="tab-content active">
+            <form id="login-form">
+                <div style="margin-bottom:.75rem"><label>Email</label><input id="login-email" required class="form-control" style="width:100%;padding:.5rem;border-radius:8px;border:1px solid var(--gray)"></div>
+                <div style="margin-bottom:.75rem"><label>Password</label><input id="login-password" type="password" required class="form-control" style="width:100%;padding:.5rem;border-radius:8px;border:1px solid var(--gray)"></div>
+                <button class="btn btn-primary" style="width:100%">Log In</button>
+            </form>
+        </div>
+        <div id="signup-tab" class="tab-content" style="display:none">
+            <form id="signup-form">
+                <div style="margin-bottom:.75rem"><label>Full Name</label><input id="signup-name" required class="form-control" style="width:100%;padding:.5rem;border-radius:8px;border:1px solid var(--gray)"></div>
+                <div style="margin-bottom:.75rem"><label>Email</label><input id="signup-email" type="email" required class="form-control" style="width:100%;padding:.5rem;border-radius:8px;border:1px solid var(--gray)"></div>
+                <div style="margin-bottom:.75rem"><label>Password</label><input id="signup-password" type="password" required class="form-control" style="width:100%;padding:.5rem;border-radius:8px;border:1px solid var(--gray)"></div>
+                <button class="btn btn-primary" style="width:100%">Create Account</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<footer class="container">
+    <p>&copy; 2023-2025 Screenplay Converter. All rights reserved.</p>
+</footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Element refs
+    const screenplayInput = document.getElementById('screenplay-input');
+    const convertBtn = document.getElementById('convert-btn');
+    const clearBtn = document.getElementById('clear-btn');
+    const saveBtn = document.getElementById('save-btn');
+    const generateAllBtn = document.getElementById('generate-all-btn');
+    const generateSingleBtn = document.getElementById('generate-single-btn');
+    const storyboardContainer = document.getElementById('storyboard-container');
+    const loginBtn = document.getElementById('login-btn');
+    const signupBtn = document.getElementById('signup-btn');
+    const authModal = document.getElementById('auth-modal');
+    const closeAuth = document.getElementById('close-auth');
+    const tabs = Array.from(document.querySelectorAll('.tab'));
+    const loginForm = document.getElementById('login-form');
+    const signupForm = document.getElementById('signup-form');
+    const modalTitle = document.getElementById('modal-title');
+    const newProjectBtn = document.getElementById('new-project-btn');
+    const chatbotMessages = document.getElementById('chatbot-messages');
+    const chatbotInput = document.getElementById('chatbot-input');
+    const sendMessageBtn = document.getElementById('send-message-btn');
+    const aiPromptInput = document.getElementById('ai-prompt-input');
+    const sceneSelect = document.getElementById('scene-select');
+    const tryNowBtn = document.getElementById('try-now-btn');
+    const importBtn = document.getElementById('import-btn');
+    const exportBtn = document.getElementById('export-btn');
+    const exportJsonBtn = document.getElementById('export-json-btn');
+    const importJsonBtn = document.getElementById('import-json-btn');
+    const projectsGrid = document.getElementById('projects-grid');
+    const aspectRatioSelect = document.getElementById('aspect-ratio-select');
+    const testApiBtn = document.getElementById('test-api-btn');
+    const styleOptionsBtn = document.getElementById('style-options-btn');
+
+    // Freepik: use server-side proxy endpoints instead of exposing API key in the browser
+    const FREEPIK_PROXY_GENERATE = '/api/freepik/generate';
+    const FREEPIK_PROXY_DEBUG = '/api/freepik/debug';
+    const ASPECT_RATIO_KEY = 'freepik_aspect_ratio';
+
+    // Load saved aspect ratio
+    const savedAspectRatio = localStorage.getItem(ASPECT_RATIO_KEY);
+    if (savedAspectRatio) {
+        aspectRatioSelect.value = savedAspectRatio;
+    }
+    
+    // Save aspect ratio when changed
+    aspectRatioSelect.addEventListener('change', () => {
+        localStorage.setItem(ASPECT_RATIO_KEY, aspectRatioSelect.value);
+    });
+
+    // Test API button (calls server debug endpoint)
+    testApiBtn.addEventListener('click', async () => {
+        testApiBtn.disabled = true;
+        const originalHTML = testApiBtn.innerHTML;
+        testApiBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Testing...';
+
+        try {
+            const resp = await fetch(FREEPIK_PROXY_DEBUG);
+            if (!resp.ok) {
+                const txt = await resp.text();
+                alert(`Freepik debug failed: ${resp.status} ${txt}`);
+            } else {
+                const data = await resp.json();
+                alert(`Freepik debug result:\nhasKey: ${data.hasKey}\nkeyTail: ${data.keyTail || 'n/a'}\nendpoint: ${data.endpoint}`);
+            }
+        } catch (err) {
+            alert('Freepik debug request failed. See console for details.');
+            console.error('Freepik debug error', err);
+        } finally {
+            testApiBtn.disabled = false;
+            testApiBtn.innerHTML = originalHTML;
+        }
+    });
+
+    // Settings button
+    styleOptionsBtn.addEventListener('click', () => {
+        const currentAspectRatio = aspectRatioSelect.value;
+        // Do not expose server API keys in the browser. Use the server debug endpoint to inspect key status.
+        alert(`Current Configuration:\n\nAspect Ratio: ${currentAspectRatio}\nAPI Key: stored on server (not exposed to browser)\nAPI Model: Mystic (Ultra-realistic)\n\nTo change aspect ratio, select from the dropdown above. To check Freepik key status, click 'Test API' or call /api/freepik/debug on the server.`);
+    });
+
+    const imageModal = document.getElementById('image-modal');
+    const modalImage = document.getElementById('modal-image');
+    const closeImageModal = document.getElementById('close-image-modal');
+    const downloadCurrentImage = document.getElementById('download-current-image');
+
+    // In-memory scenes
+    let currentScenes = [];
+    let currentProject = null; // {id,name,script,scenes}
+    const PROJECT_KEY = 'sp_projects_v1';
+
+    // Get aspect ratio from localStorage or use default
+    function getAspectRatio() {
+        return aspectRatioSelect.value || 'widescreen_16_9';
+    }
+
+    // Fallback images in case Freepik API fails or reaches quota
+    // Using Unsplash images that don't require API keys
+    const fallbackImages = [
+        "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1499084732479-de2c02d45fc4?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1503264116251-35a269479413?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1522869635100-ce306e08d563?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=1200&q=80"
+    ];
+
+    // --- Modal & tabs ---
+    loginBtn.addEventListener('click', () => openAuth('login'));
+    signupBtn.addEventListener('click', () => openAuth('signup'));
+    closeAuth.addEventListener('click', () => authModal.style.display = 'none');
+    window.addEventListener('click', (e) => { if (e.target === authModal) authModal.style.display = 'none'; });
+
+    tabs.forEach(tab => tab.addEventListener('click', () => switchTab(tab.dataset.tab)));
+    function openAuth(tabName='login'){ authModal.style.display='flex'; switchTab(tabName); }
+    function switchTab(name){ tabs.forEach(t=>{ t.classList.toggle('active', t.dataset.tab===name); const content=document.getElementById(t.dataset.tab+'-tab'); if(content) content.style.display = (t.dataset.tab===name)?'block':'none'; }); modalTitle.textContent = nameToTitle(name); }
+    function nameToTitle(n){ return n==='login' ? 'Log In to Your Account':'Create a New Account'; }
+
+    loginForm.addEventListener('submit', e=>{ e.preventDefault(); alert('Demo login — replace with a real backend'); authModal.style.display='none'; });
+    signupForm.addEventListener('submit', e=>{ e.preventDefault(); alert('Demo signup — replace with a real backend'); authModal.style.display='none'; });
+
+    // --- Projects (localStorage) ---
+    function loadProjects(){
+        const raw = localStorage.getItem(PROJECT_KEY);
+        return raw ? JSON.parse(raw) : [];
+    }
+    function saveProjects(list){ localStorage.setItem(PROJECT_KEY, JSON.stringify(list)); renderProjects(); }
+    function renderProjects(){
+        const list = loadProjects();
+        projectsGrid.innerHTML = '';
+        if(list.length===0){ projectsGrid.innerHTML = '<div class="placeholder-text">No local projects yet. Save a project to see it here.</div>'; return; }
+        list.forEach(p => {
+            const card = document.createElement('div'); card.className='project-card';
+            card.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem"><strong>${escapeHtml(p.name)}</strong><div style="font-size:.85rem;color:var(--gray)">${new Date(p.updated).toLocaleString()}</div></div><div style="font-size:.9rem;color:var(--gray);margin-bottom:.75rem">${(p.scenes||[]).length} scenes</div><div style="display:flex;gap:.5rem"><button class='btn btn-primary btn-sm' data-action='load' data-id='${p.id}'>Open</button><button class='btn btn-outline btn-sm' data-action='rename' data-id='${p.id}'>Rename</button><button class='btn btn-outline btn-sm' data-action='delete' data-id='${p.id}'>Delete</button></div>`;
+            projectsGrid.appendChild(card);
+        });
+    }
+
+    function createProjectObject(name, script, scenes){ return { id: 'p_' + Date.now(), name: name||('Project ' + new Date().toLocaleString()), script: script||'', scenes: scenes||[], created: Date.now(), updated: Date.now() }; }
+
+    projectsGrid.addEventListener('click', (e)=>{
+        const btn = e.target.closest('button'); if(!btn) return;
+        const action = btn.dataset.action; const id = btn.dataset.id; let list = loadProjects();
+        const idx = list.findIndex(x=>x.id===id);
+        if(action==='load' && idx>=0){ const p = list[idx]; loadProject(p); }
+        if(action==='delete' && idx>=0){ if(confirm('Delete this project?')){ list.splice(idx,1); saveProjects(list); if(currentProject && currentProject.id===id){ currentProject=null; } }}
+        if(action==='rename' && idx>=0){ const newName = prompt('New project name:', list[idx].name); if(newName){ list[idx].name = newName; list[idx].updated = Date.now(); saveProjects(list); }}
+    });
+
+    // initial render
+    renderProjects();
+
+    // --- Chatbot wiring: send user message to server /api/generate and show replies ---
+    function appendChatMessage(text, from = 'bot'){
+        const msg = document.createElement('div');
+        msg.className = 'message ' + (from === 'user' ? 'user-message' : 'bot-message');
+        msg.textContent = text;
+        chatbotMessages.appendChild(msg);
+        chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+        return msg;
+    }
+
+    // Quota banner management
+    const quotaBannerId = 'quota-banner';
+    function ensureQuotaBanner(){
+        let b = document.getElementById(quotaBannerId);
+        if(b) return b;
+        b = document.createElement('div');
+        b.id = quotaBannerId;
+        b.style.cssText = 'display:none;padding:.6rem 1rem;background:#fff3cd;color:#856404;border:1px solid #ffeeba;border-radius:8px;margin-bottom:.5rem';
+        chatbotMessages.parentNode.insertBefore(b, chatbotMessages);
+        return b;
+    }
+    function showQuotaBanner(message, seconds){
+        const b = ensureQuotaBanner();
+        b.textContent = message || 'AI quota exceeded. Please try again later.';
+        b.style.display = 'block';
+        if(seconds && seconds > 0){
+            let remaining = seconds;
+            b.textContent = `${message} Retry after ${remaining}s.`;
+            const iv = setInterval(()=>{
+                remaining -= 1;
+                if(remaining <= 0){ clearInterval(iv); b.style.display='none'; }
+                else b.textContent = `${message} Retry after ${remaining}s.`;
+            }, 1000);
+        }
+    }
+    function hideQuotaBanner(){ const b = document.getElementById(quotaBannerId); if(b) b.style.display='none'; }
+
+    async function sendChatMessage(){
+        const raw = chatbotInput.value.trim();
+        if(!raw) return;
+        // show user message
+        appendChatMessage(raw, 'user');
+        chatbotInput.value = '';
+
+        // show loading bot message
+        const loadingMsg = appendChatMessage('Thinking...', 'bot');
+
+        try{
+            // Use Puter.js with Perplexity Sonar model
+            const response = await puter.ai.chat(raw, { model: 'perplexity/sonar' });
+            hideQuotaBanner();
+            loadingMsg.textContent = response || 'No response from AI.';
+        }catch(err){
+            console.error('Chat error', err);
+            loadingMsg.textContent = 'AI request failed: ' + (err.message || 'Unknown error');
+        }
+    }
+
+    // send on click
+    sendMessageBtn.addEventListener('click', sendChatMessage);
+    // send on Enter
+    chatbotInput.addEventListener('keydown', (e)=>{ if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); sendChatMessage(); } });
+
+    // New project
+    newProjectBtn.addEventListener('click', ()=>{
+        if(!confirm('Create new project? Unsaved changes will remain.')) return;
+        screenplayInput.value = '';
+        storyboardContainer.innerHTML = '<div class="placeholder-text">Your storyboard will appear here after converting your screenplay</div>';
+        sceneSelect.innerHTML = '<option value="">Select a scene...</option>';
+        currentScenes = [];
+        currentProject = null;
+        alert('New project started.');
+    });
+
+    // Import / Export JSON (project)
+    importJsonBtn.addEventListener('click', ()=>{
+        const input = document.createElement('input'); input.type='file'; input.accept='application/json';
+        input.addEventListener('change', (ev)=>{
+            const file = ev.target.files[0]; if(!file) return;
+            const reader = new FileReader(); reader.onload = () => {
+                try{
+                    const obj = JSON.parse(reader.result);
+                    if(obj && obj.script){ screenplayInput.value = obj.script; const scenes = obj.scenes || []; currentScenes = scenes; renderScenes(scenes); alert('Imported project JSON.'); }
+                    else alert('JSON does not look like a project.');
+                }catch(err){ alert('Error reading JSON: ' + err.message); }
+            }; reader.readAsText(file);
+        }); input.click();
+    });
+
+    exportJsonBtn.addEventListener('click', ()=>{
+        const name = prompt('Project name to export:', (currentProject && currentProject.name) || 'My Project');
+        const obj = { name: name, script: screenplayInput.value, scenes: currentScenes, exportedAt: Date.now() };
+        const blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = (name.replace(/[^a-z0-9\-_\.]/gi,'_') || 'project') + '.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    });
+
+    // Import screenplay (text) - reuses import button
+    importBtn.addEventListener('click', ()=>{
+        const input = document.createElement('input'); input.type='file'; input.accept='.txt';
+        input.addEventListener('change', (ev)=>{
+            const file = ev.target.files[0]; if(!file) return; const reader = new FileReader(); reader.onload = () => { screenplayInput.value = reader.result; alert('Screenplay imported.'); };
+            reader.readAsText(file);
+        }); input.click();
+    });
+
+    // Export screenplay text
+    exportBtn.addEventListener('click', ()=>{
+        const text = screenplayInput.value || '';
+        const blob = new Blob([text], { type: 'text/plain' }); const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href=url; a.download = 'screenplay.txt'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    });
+
+    // Clear
+    clearBtn.addEventListener('click', ()=>{
+        if(confirm('Clear screenplay and storyboard?')){ screenplayInput.value=''; storyboardContainer.innerHTML='<div class="placeholder-text">Your storyboard will appear here after converting your screenplay</div>'; sceneSelect.innerHTML = '<option value="">Select a scene...</option>'; currentScenes=[]; }
+    });
+
+    // Save project to local storage
+    saveBtn.addEventListener('click', ()=>{
+        const name = prompt('Project name:', (currentProject && currentProject.name) || 'Untitled Project'); if(!name) return;
+        let list = loadProjects();
+        if(currentProject){ // update
+            const idx = list.findIndex(p=>p.id===currentProject.id);
+            if(idx>=0){ list[idx].name = name; list[idx].script = screenplayInput.value; list[idx].scenes = currentScenes; list[idx].updated = Date.now(); }
+            else{ const p = createProjectObject(name, screenplayInput.value, currentScenes); list.unshift(p); currentProject = p; }
+        } else { const p = createProjectObject(name, screenplayInput.value, currentScenes); list.unshift(p); currentProject = p; }
+        saveProjects(list); alert('Project saved locally.');
+    });
+
+    // Convert screenplay to storyboard
+    convertBtn.addEventListener('click', ()=>{
+        const txt = screenplayInput.value.trim(); if(!txt){ alert('Please enter a screenplay to convert.'); return; }
+        const scenes = parseScreenplay(txt); currentScenes = scenes; renderScenes(scenes);
+    });
+
+    function renderScenes(scenes){
+        storyboardContainer.innerHTML = '';
+        sceneSelect.innerHTML = '<option value="">Select a scene...</option>';
+        if(!scenes || scenes.length===0){ storyboardContainer.innerHTML = '<div class="placeholder-text">No scenes found.</div>'; return; }
+        scenes.forEach((scene, idx)=>{
+            sceneSelect.appendChild(optionEl(idx, scene));
+            storyboardContainer.appendChild(createSceneCard(scene, idx));
+        });
+    }
+
+    function optionEl(idx, scene){ const o = document.createElement('option'); o.value = idx; o.textContent = `Scene ${idx+1}: ${scene.heading}`; return o; }
+
+    // Generate all images with proper error handling and progress
+    generateAllBtn.addEventListener('click', async () => {
+        if (currentScenes.length === 0) { 
+            alert('Please convert a screenplay first.'); 
+            return; 
+        }
+
+        // Freepik API is ready to use - no template UID needed
+
+        generateAllBtn.disabled = true;
+        const originalHTML = generateAllBtn.innerHTML;
+        generateAllBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+        
+        const divs = document.querySelectorAll('.scene-image');
+        let successCount = 0;
+        let errorCount = 0;
+
+        // Show loading state on each scene
+        for (let i = 0; i < divs.length; i++) {
+            const loadingDiv = document.createElement('div');
+            loadingDiv.style.cssText = 'text-align:center;padding:2rem;background:linear-gradient(45deg,#ddd,#eee);';
+            loadingDiv.innerHTML = `<i class="fas fa-spinner fa-spin" style="font-size:28px;color:var(--primary)"></i><div style="margin-top:.5rem">Generating scene ${i+1}...</div>`;
+            divs[i].innerHTML = '';
+            divs[i].appendChild(loadingDiv);
+        }
+
+        // Generate images one by one with error handling
+        for (let i = 0; i < divs.length && i < currentScenes.length; i++) {
+            try {
+                const sceneText = (currentScenes[i] && (currentScenes[i].description || currentScenes[i].heading)) || 'Screenplay Scene';
+                generateAllBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Generating ${i+1}/${divs.length}...`;
+                
+                const imgUrl = await getRelevantImage(sceneText, i);
+                
+                if (imgUrl && !imgUrl.includes('unsplash.com')) {
+                    setSceneImage(divs[i], imgUrl, i);
+                    successCount++;
+                } else {
+                    // Fallback image was used
+                    setSceneImage(divs[i], imgUrl, i);
+                    errorCount++;
+                }
+            } catch (err) {
+                console.error(`Error generating image for scene ${i+1}:`, err);
+                errorCount++;
+                // Set fallback image
+                const fallbackUrl = fallbackImages[i % fallbackImages.length];
+                setSceneImage(divs[i], fallbackUrl, i);
+            }
+            
+            // Small delay to avoid rate limiting
+            await new Promise(resolve => setTimeout(resolve, 300));
+        }
+
+        generateAllBtn.disabled = false;
+        generateAllBtn.innerHTML = originalHTML;
+        
+        const message = successCount > 0 
+            ? `Generated ${successCount} image(s) successfully!${errorCount > 0 ? ` (${errorCount} used fallback)` : ''}` 
+            : `Could not generate images from Freepik. Using fallback images instead. To generate AI images:\n\n1. Upgrade your Freepik API plan (free trial has quota limits)\n2. Or add a new API key with available quota\n3. Update FREEPIK_API_KEY in .env and restart the server`;
+        alert(message);
+    });
+
+
+    // Generate single with prompt
+    generateSingleBtn.addEventListener('click', async ()=>{
+        const idxStr = sceneSelect.value; 
+        const prompt = aiPromptInput.value.trim();
+        
+        if(idxStr===''){ 
+            alert('Please select a scene to generate an image for.'); 
+            return; 
+        }
+        
+        if(!prompt){ 
+            alert('Please enter a prompt for image generation.'); 
+            return; 
+        }
+        
+        const idx = parseInt(idxStr,10);
+        const divs = document.querySelectorAll('.scene-image'); 
+        
+        if(idx >= divs.length || idx < 0){ 
+            alert('Invalid scene selected.'); 
+            return; 
+        }
+        
+        generateSingleBtn.disabled=true; 
+        const originalHTML = generateSingleBtn.innerHTML;
+        generateSingleBtn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Generating...';
+        
+        // Show loading state
+        const loadingDiv = document.createElement('div');
+        loadingDiv.style.cssText = 'text-align:center;padding:2rem;background:linear-gradient(45deg,#ddd,#eee);';
+        loadingDiv.innerHTML = `<i class="fas fa-spinner fa-spin" style="font-size:28px;color:var(--primary)"></i><div style="margin-top:.5rem">Generating image...</div>`;
+        divs[idx].innerHTML = '';
+        divs[idx].appendChild(loadingDiv);
+        
+        try {
+            const imgUrl = await getRelevantImage(prompt, idx);
+            
+            if (imgUrl && !imgUrl.includes('unsplash.com')) {
+                setSceneImage(divs[idx], imgUrl, idx);
+                alert('Image generated successfully!');
+            } else {
+                setSceneImage(divs[idx], imgUrl, idx);
+                alert('Image generated (using fallback). Please check your Freepik API key on the server and call /api/freepik/debug for details.');
+            }
+            
+            aiPromptInput.value='';
+        } catch (err) {
+            console.error('Image generation error:', err);
+            const errorMsg = err.message || 'Unknown error';
+            alert(`Failed to generate image: ${errorMsg}\n\nCheck the browser console (F12) and server logs. Also verify Freepik API key on server and call /api/freepik/debug.`);
+            // Set fallback image
+            const fallbackUrl = fallbackImages[idx % fallbackImages.length];
+            setSceneImage(divs[idx], fallbackUrl, idx);
+        } finally {
+            generateSingleBtn.disabled=false; 
+            generateSingleBtn.innerHTML = originalHTML;
+        }
+    });
+
+    // set image into container div, add data-src attribute
+    function setSceneImage(div, src, idx){ div.innerHTML=''; const img = document.createElement('img'); img.src = src; img.alt = `Scene ${idx+1}`; div.appendChild(img); div.dataset.src = src; }
+
+    // Create scene card
+    function createSceneCard(scene, index){
+        const card = document.createElement('div'); card.className='scene-card';
+        const imgDiv = document.createElement('div'); imgDiv.className='scene-image'; imgDiv.innerHTML = `<div style="text-align:center"><i class='fas fa-image' style='font-size:28px'></i><div>Scene ${index+1} — Click to generate</div></div>`;
+        const content = document.createElement('div'); content.className='scene-content';
+        const heading = document.createElement('div'); heading.className='scene-heading'; const htxt = document.createElement('div'); htxt.textContent = scene.heading; const num = document.createElement('div'); num.className='scene-number'; num.textContent = index+1; heading.appendChild(htxt); heading.appendChild(num);
+        const desc = document.createElement('div'); desc.className='scene-description'; desc.textContent = scene.description || 'No description available.';
+        const chars = document.createElement('div'); chars.className='scene-characters'; chars.textContent = `Characters: ${scene.characters && scene.characters.length ? scene.characters.join(', ') : 'None'}`;
+        const actions = document.createElement('div'); actions.className='scene-actions';
+        const regen = document.createElement('button'); regen.className='btn btn-primary btn-sm'; regen.innerHTML = '<i class="fas fa-redo"></i> Regenerate';
+        const download = document.createElement('button'); download.className='btn btn-outline btn-sm'; download.innerHTML = '<i class="fas fa-download"></i> Download';
+
+        actions.appendChild(regen); actions.appendChild(download);
+        content.appendChild(heading); content.appendChild(desc); content.appendChild(chars); content.appendChild(actions);
+        card.appendChild(imgDiv); card.appendChild(content);
+
+        // click image to open modal (if image exists)
+        imgDiv.addEventListener('click', async ()=>{
+            let src = imgDiv.dataset.src;
+            if (!src || src.includes('unsplash.com') || !src.startsWith('http')) {
+                
+                // Show loading
+                const loadingDiv = document.createElement('div');
+                loadingDiv.style.cssText = 'text-align:center;padding:2rem;background:linear-gradient(45deg,#ddd,#eee);';
+                loadingDiv.innerHTML = `<i class="fas fa-spinner fa-spin" style="font-size:28px;color:var(--primary)"></i><div style="margin-top:.5rem">Generating...</div>`;
+                imgDiv.innerHTML = '';
+                imgDiv.appendChild(loadingDiv);
+                
+                try {
+                    src = await getRelevantImage(scene.description || scene.heading || 'Screenplay Scene', index);
+                    setSceneImage(imgDiv, src, index);
+                } catch (err) {
+                    console.error('Error generating image:', err);
+                    alert(`Failed to generate image: ${err.message || 'Unknown error'}`);
+                    const fallbackUrl = fallbackImages[index % fallbackImages.length];
+                    setSceneImage(imgDiv, fallbackUrl, index);
+                    src = fallbackUrl;
+                }
+            }
+            if (src) {
+                openImageModal(src);
+            }
+        });
+
+        regen.addEventListener('click', async ()=>{
+            regen.disabled=true; 
+            const originalHTML = regen.innerHTML;
+            regen.innerHTML='<i class="fas fa-spinner fa-spin"></i> Regenerating...';
+            
+            // Show loading state
+            const loadingDiv = document.createElement('div');
+            loadingDiv.style.cssText = 'text-align:center;padding:2rem;background:linear-gradient(45deg,#ddd,#eee);';
+            loadingDiv.innerHTML = `<i class="fas fa-spinner fa-spin" style="font-size:28px;color:var(--primary)"></i><div style="margin-top:.5rem">Regenerating...</div>`;
+            imgDiv.innerHTML = '';
+            imgDiv.appendChild(loadingDiv);
+            
+            try {
+                const sceneText = scene.description || scene.heading || 'Screenplay Scene';
+                const imgUrl = await getRelevantImage(sceneText, index);
+                
+                if (imgUrl && !imgUrl.includes('unsplash.com')) {
+                    setSceneImage(imgDiv, imgUrl, index);
+                    alert('Scene image regenerated successfully!');
+                } else {
+                    setSceneImage(imgDiv, imgUrl, index);
+                    alert('Image regenerated (using fallback). Check the Freepik API key on the server and call /api/freepik/debug for more info.');
+                }
+            } catch (err) {
+                console.error('Regeneration error:', err);
+                const errorMsg = err.message || 'Unknown error';
+                alert(`Failed to regenerate image: ${errorMsg}\n\nCheck the browser console and server logs. Verify the Freepik API key and call /api/freepik/debug.`);
+                // Set fallback image
+                const fallbackUrl = fallbackImages[index % fallbackImages.length];
+                setSceneImage(imgDiv, fallbackUrl, index);
+            } finally {
+                regen.disabled=false; 
+                regen.innerHTML = originalHTML;
+            }
+        });
+
+        download.addEventListener('click', ()=>{ const src = imgDiv.dataset.src; if(!src){ alert('No image available for this scene yet. Generate it first.'); return; } downloadUrl(src, `scene_${index+1}.jpg`); });
+
+        return card;
+    }
+
+    // Image modal
+    function openImageModal(src){ modalImage.src = src; imageModal.style.display='flex'; }
+    closeImageModal.addEventListener('click', ()=> imageModal.style.display='none');
+    window.addEventListener('click', (e)=>{ if(e.target===imageModal) imageModal.style.display='none'; });
+    downloadCurrentImage.addEventListener('click', ()=>{ const src = modalImage.src; if(src) downloadUrl(src, 'scene_image.jpg'); });
+
+    function downloadUrl(url, filename){ fetch(url).then(res=>res.blob()).then(blob=>{ const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = filename; document.body.appendChild(link); link.click(); link.remove(); URL.revokeObjectURL(link.href); }).catch(err=>{ // fallback: open in new tab
+        window.open(url,'_blank'); }); }
+
+    // Utility: improved screenplay parser
+    function parseScreenplay(text){
+        const lines = text.split(/\r?\n/);
+        const scenes = []; let current = null;
+        const isSceneHeading = l => /^\s*(INT\.|EXT\.)/i.test(l);
+        const isCharacter = l => /^[A-Z0-9 ',-]{2,}$/.test(l) && l === l.toUpperCase() && l.length < 40 && !/^(INT|EXT)\b/.test(l);
+
+        for(let i=0;i<lines.length;i++){
+            const raw = lines[i]; const line = raw.trim();
+            if(!line) continue;
+            if(isSceneHeading(line)){
+                if(current) scenes.push(current);
+                current = { heading: line, description:'', characters:[], dialogue:[] };
+                continue;
+            }
+            if(!current){ // text before first heading -> create a generic scene
+                current = { heading: 'OPENING', description: line, characters:[], dialogue:[] };
+                continue;
+            }
+            // Parentheticals like (V.O.) or (frustrated)
+            if(/^\(.*\)$/.test(line)){
+                // attach to last dialogue or description
+                if(current.dialogue.length) current.dialogue[current.dialogue.length-1].parenthetical = line;
+                else current.description += (current.description? ' ':'') + line.replace(/[()]/g,'');
+                continue;
+            }
+            if(isCharacter(line)){
+                // treat as character line; next non-empty line(s) that are not all caps are dialogue
+                const character = line;
+                current.characters.push(character);
+                // collect dialogue lines after character
+                let j = i+1; let collected = '';
+                while(j<lines.length){ const l2 = lines[j].trim(); if(!l2){ j++; continue; } if(/^[A-Z0-9 ',-]{2,}$/.test(l2) && l2===l2.toUpperCase()) break; // next char
+                    if(/^\(.*\)$/.test(l2)){ collected += (collected?' ':'') + l2; j++; continue; }
+                    if(l2 && l2 !== l2.toUpperCase()){ collected += (collected? ' ':'') + l2; j++; continue; }
+                    break;
+                }
+                if(collected) current.dialogue.push({ character, text: collected });
+                i = j-1; continue;
+            }
+            // otherwise treat as description
+            current.description += (current.description? ' ':'') + line;
+        }
+        if(current) scenes.push(current);
+        return scenes;
+    }
+
+    // Note: task polling and API key access are handled server-side by `/api/freepik/generate`.
+    // The client should not attempt to poll Freepik endpoints directly (that would expose the API key).
+    // If you need to check a task status from the client, add a server route that accepts a task id and
+    // returns status/url while keeping the API key secret on the server.
+
+    // Generate dynamic image using Freepik API based on screenplay text
+    async function getRelevantImage(sceneText, index) {
+        // Clean and prepare the text prompt
+        let prompt = (sceneText || "Screenplay Scene").trim();
+        if (prompt.length > 500) {
+            prompt = prompt.substring(0, 500) + '...';
+        }
+        // Clean up text - replace newlines with spaces
+        prompt = prompt.replace(/\n/g, ' ').replace(/\r/g, ' ').replace(/\s+/g, ' ');
+        
+        // Enhance prompt for better image generation
+        const enhancedPrompt = `Cinematic scene: ${prompt}, high quality, professional photography, movie still`;
+        
+        try {
+            const aspectRatio = getAspectRatio();
+            const body = { prompt: enhancedPrompt, aspect_ratio: aspectRatio };
+
+            // POST to server proxy which holds the Freepik key and does polling
+            const resp = await fetch(FREEPIK_PROXY_GENERATE, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+
+            if (!resp.ok) {
+                let errText = `${resp.status}`;
+                try { const e = await resp.json(); errText = e.error || JSON.stringify(e); } catch(_) { errText = await resp.text(); }
+                console.error('Freepik proxy error:', resp.status, errText);
+                throw new Error(`Freepik proxy failed: ${errText}`);
+            }
+
+            const result = await resp.json();
+            const imageUrl = result?.url || result?.data?.url || result?.data?.image_url || null;
+            if (imageUrl && typeof imageUrl === 'string') return imageUrl;
+            console.warn('Freepik proxy returned unexpected format:', result);
+            throw new Error('Unexpected proxy response');
+        } catch (err) {
+            console.error('Freepik proxy error:', err);
+            const fallbackUrl = fallbackImages[index % fallbackImages.length];
+            console.warn('Using fallback image due to error:', err.message);
+            return fallbackUrl;
+        }
+    }
+
+});
+</script>
+</body>
+</html>
